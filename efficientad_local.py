@@ -56,6 +56,8 @@ def get_argparse():
     parser.add_argument('-f', '--freeze_steps', type=int, default=100)
     parser.add_argument('-c', '--image_width', type=int, default=128)
     parser.add_argument('-e', '--image_height', type=int, default=32)
+
+    parser.add_argument('-f', '--base_dataset', default='dataset')
     return parser.parse_args()
 
 def main():
@@ -88,9 +90,9 @@ def main():
     random.seed(seed)
 
     if config.dataset == 'spesso':
-        dataset_path = "datasets/spesso"
+        dataset_path =  os.path.join( config.base_dataset, "spesso" )
     elif config.dataset == 'fino':
-        dataset_path = "datasets/fino"
+        dataset_path = os.path.join( config.base_dataset, "fino" )
     else:
         raise Exception('Unknown dataset')
 
