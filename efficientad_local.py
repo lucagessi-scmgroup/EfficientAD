@@ -54,35 +54,38 @@ def get_argparse():
                         help='Downloaded Mvtec LOCO dataset')
     parser.add_argument('-t', '--train_steps', type=int, default=500)
     parser.add_argument('-f', '--freeze_steps', type=int, default=100)
+    parser.add_argument('-c', '--image_width', type=int, default=128)
+    parser.add_argument('-e', '--image_height', type=int, default=32)
     return parser.parse_args()
 
-# constants
-seed = 42
-on_gpu = torch.cuda.is_available()
-out_channels = 384
-image_size = 33
-
-# data loading
-default_transform = transforms.Compose([
-    transforms.Resize((image_size, 128)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-])
-transform_ae = transforms.RandomChoice([
-    transforms.ColorJitter(brightness=0.2),
-    transforms.ColorJitter(contrast=0.2),
-    transforms.ColorJitter(saturation=0.2)
-])
-
-def train_transform(image):
-    return default_transform(image), default_transform(transform_ae(image))
-
 def main():
+
+    config = get_argparse()
+
+    # constants
+    seed = 42
+    on_gpu = torch.cuda.is_available()
+    out_channels = 384
+    image_size = config.image_height
+
+    # data loading
+    default_transform = transforms.Compose([
+        transforms.Resize((image_size, config.image_width)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
+    transform_ae = transforms.RandomChoice([
+        transforms.ColorJitter(brightness=0.2),
+        transforms.ColorJitter(contrast=0.2),
+        transforms.ColorJitter(saturation=0.2)
+    ])
+
+    def train_transform(image):
+        return default_transform(image), default_transform(transform_ae(image))
+
     torch.manual_seed(seed)
     np.random.seed(seed)
     random.seed(seed)
-
-    config = get_argparse()
 
     if config.dataset == 'spesso':
         dataset_path = "datasets/spesso"
