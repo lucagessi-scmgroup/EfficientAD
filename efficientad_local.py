@@ -57,7 +57,7 @@ def get_argparse():
     parser.add_argument('-c', '--image_width', type=int, default=128)
     parser.add_argument('-e', '--image_height', type=int, default=32)
 
-    parser.add_argument('-f', '--base_dataset', default='dataset')
+    parser.add_argument('-g', '--base_dataset', default='dataset')
     return parser.parse_args()
 
 def main():
