@@ -60,17 +60,27 @@ def get_argparse():
     parser.add_argument('-g', '--base_dataset', default='dataset')
     return parser.parse_args()
 
+seed = 42
+on_gpu = torch.cuda.is_available()
+out_channels = 384
+default_transform = None
+transform_ae = None
+
 def main():
 
     config = get_argparse()
 
     # constants
-    seed = 42
-    on_gpu = torch.cuda.is_available()
-    out_channels = 384
+    global image_size
+    global seed
+    global on_gpu
+    global out_channels
+
     image_size = config.image_height
 
     # data loading
+    global default_transform
+    global transform_ae
     default_transform = transforms.Compose([
         transforms.Resize((image_size, config.image_width)),
         transforms.ToTensor(),
