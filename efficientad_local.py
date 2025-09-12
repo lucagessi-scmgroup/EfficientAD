@@ -168,8 +168,8 @@ def main():
 
     # create models
     if config.model_size == 'small':
-        teacher = get_pdn_small(out_channels, True)
-        student = get_pdn_small(out_channels, True)
+        teacher = get_pdn_small(out_channels)
+        student = get_pdn_small(out_channels)
     elif config.model_size == 'medium':
         teacher = get_pdn_medium(out_channels)
         student = get_pdn_medium(out_channels)
