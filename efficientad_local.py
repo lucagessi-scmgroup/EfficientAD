@@ -8,20 +8,36 @@ from torchvision import transforms
 import argparse
 import itertools
 import os
+import re
 import random
 from tqdm import tqdm
 from common import get_pdn_small, get_pdn_medium, \
     ImageFolderWithoutTarget, ImageFolderWithPath, InfiniteDataloader
 from sklearn.metrics import roc_auc_score
 
+def next_output_dir(root=".", base_name=""):
+    # Trova tutte le cartelle esistenti con nome base_name + numero
+    pattern = re.compile(fr"{re.escape(base_name)}\d+$") 
+    dirs = [d for d in os.listdir(root) if os.path.isdir(os.path.join(root, d)) and pattern.fullmatch(d)]
+    # dirs = [d for d in os.listdir(root) if os.path.isdir(d) and re.match(fr"{base_name}\d+", d)]
+    
+    if dirs:
+        # Estrai i numeri e trova il massimo
+        nums = [int(re.search(r"(\d+)", d).group(1)) for d in dirs]
+        next_num = max(nums) + 1
+    else:
+        next_num = 1
+
+    return f"{base_name}{next_num}"
+
 def get_argparse():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--dataset', default='spesso',
+    parser.add_argument('-d', '--dataset', default='fino',
                         choices=['spesso', 'fino'])
     parser.add_argument('-s', '--subdataset', default='bottle',
                         help='One of 15 sub-datasets of Mvtec AD or 5' +
                              'sub-datasets of Mvtec LOCO')
-    parser.add_argument('-o', '--output_dir', default='output/1')
+    parser.add_argument('-o', '--output_dir', default='output/')
     parser.add_argument('-m', '--model_size', default='small',
                         choices=['small', 'medium'])
     parser.add_argument('-w', '--weights', default='models/teacher_small.pth')
@@ -36,8 +52,8 @@ def get_argparse():
     parser.add_argument('-b', '--mvtec_loco_path',
                         default='./mvtec_loco_anomaly_detection',
                         help='Downloaded Mvtec LOCO dataset')
-    parser.add_argument('-t', '--train_steps', type=int, default=70000)
-    parser.add_argument('-f', '--freeze_steps', type=int, default=10000)
+    parser.add_argument('-t', '--train_steps', type=int, default=500)
+    parser.add_argument('-f', '--freeze_steps', type=int, default=100)
     return parser.parse_args()
 
 # constants
@@ -79,6 +95,8 @@ def main():
     if config.imagenet_train_path == 'none':
         pretrain_penalty = False
 
+    config.output_dir = os.path.join( config.output_dir, next_output_dir( config.output_dir ) )
+    print(config.output_dir)
     # create output dir
     train_output_dir = os.path.join(config.output_dir, 'trainings',
                                     config.dataset)
@@ -135,8 +153,8 @@ def main():
 
     # create models
     if config.model_size == 'small':
-        teacher = get_pdn_small(out_channels)
-        student = get_pdn_small(out_channels)
+        teacher = get_pdn_small(out_channels, True)
+        student = get_pdn_small(out_channels, True)
     elif config.model_size == 'medium':
         teacher = get_pdn_medium(out_channels)
         student = get_pdn_medium(out_channels)
@@ -198,7 +216,7 @@ def main():
             torch.save(student, os.path.join(train_output_dir,
                                              'student_tmp.pth'))
 
-        if iteration % 10000 == 0 and iteration > 0:
+        if iteration % config.freeze_steps == 0 and iteration > 0:
             # run intermediate evaluation
             teacher.eval()
             student.eval()
