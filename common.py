@@ -68,7 +68,7 @@ def get_pdn_tiny(out_channels=384, padding=False):
                   padding=3 * pad_mult),
         nn.ReLU(inplace=True),
         nn.AvgPool2d(kernel_size=2, stride=2, padding=1 * pad_mult),
-        nn.Conv2d(in_channels=64, out_channels=96, kernel_size=4,
+        nn.Conv2d(in_channels=48, out_channels=96, kernel_size=4,
                   padding=3 * pad_mult),
         nn.ReLU(inplace=True),
         nn.AvgPool2d(kernel_size=2, stride=2, padding=1 * pad_mult),
