@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.models import Wide_ResNet101_2_Weights
 from tqdm import tqdm
-from common import (get_pdn_small, get_pdn_medium,
+from common import (get_pdn_tiny, get_pdn_small, get_pdn_medium,
                     ImageFolderWithoutTarget, InfiniteDataloader)
 
 
@@ -71,6 +71,8 @@ def main():
         pdn = get_pdn_small(out_channels, padding=True)
     elif model_size == 'medium':
         pdn = get_pdn_medium(out_channels, padding=True)
+    elif model_size == 'tiny':
+        pdn = get_pdn_tiny(out_channels, padding=True)
     else:
         raise Exception()
 
